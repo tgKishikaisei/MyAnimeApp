@@ -94,7 +94,7 @@ jobs:
           docker build -t aniflow-backend:ci ./backend
           docker build -t aniflow-frontend:ci ./frontend
       - name: Trivy (Critical/High блокирует)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: aniflow-backend:ci
           severity: CRITICAL,HIGH
