@@ -1,0 +1,23 @@
+# Ничего из этого не должно попасть в образ: секреты, локальные окружения,
+# пользовательские файлы (их монтирует volume), тесты и кэши.
+.env
+.env.*
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+static/videos/
+static/avatars/
+static/uploads/
+static/thumbnails/
+static/anime_images/
+data/
+tests/
+scripts/manual_tests/
+scripts/debug/
+*.log
+*.db
+.git
+.idea

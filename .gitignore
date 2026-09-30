@@ -1,0 +1,73 @@
+# Секреты — никогда в git (используйте .env.example как образец)
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+frontend/dist/
+storybook-static/
+
+# Данные и загрузки пользователей
+backend/static/videos/
+backend/static/avatars/
+backend/static/uploads/
+backend/static/thumbnails/
+backend/static/anime_images/
+backend/data/
+*.db
+*.sqlite3
+*.log
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+monitoring/prometheus/metrics_token
+
+# Секреты и локальные данные
+*.session
+*.session-journal
+config.ini
+client_secret*.json
+service_account*.json
+authorized_user.json
+*.pem
+*.key
+aiogram_log.txt
+# Python
+*.py[cod]
+venvv/
+# Node
+dist/
+# IDE и служебные файлы
+.vscode/
+AUDIT.md
+CLAUDE.md
+.agents/
+.claude/
+text/
+static/uploads/
+frontend/build_errors.txt
+frontend/build_output.txt
+frontend/$null
+

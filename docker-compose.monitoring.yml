@@ -1,0 +1,46 @@
+# Мониторинг (Prometheus + Grafana). Порты открыты только на localhost.
+# Пароль администратора Grafana — из .env (GRAFANA_ADMIN_PASSWORD), анонимный
+# доступ выключен.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+    environment:
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+    ports:
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_SECURITY_ALLOW_EMBEDDING: "false"
+      GF_SECURITY_COOKIE_SECURE: "true"
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:

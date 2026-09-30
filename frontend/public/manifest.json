@@ -1,0 +1,55 @@
+{
+    "name": "AniFlow",
+    "short_name": "AniFlow",
+    "description": "Anime episodes, clips and an edit studio",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/aniflow-logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/aniflow-logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "entertainment",
+        "video"
+    ],
+    "screenshots": [
+        {
+            "src": "/hero.jpg",
+            "sizes": "1280x720",
+            "type": "image/svg+xml"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Browse Clips",
+            "short_name": "Clips",
+            "url": "/Clips",
+            "description": "Browse all anime clips"
+        },
+        {
+            "name": "My Playlists",
+            "short_name": "Playlists",
+            "url": "/playlists",
+            "description": "View your clip collections"
+        },
+        {
+            "name": "Search",
+            "short_name": "Search",
+            "url": "/search",
+            "description": "Search for anime"
+        }
+    ]
+}

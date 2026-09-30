@@ -1,0 +1,105 @@
+# Локальная разработка и «прод на одной машине».
+# Все секреты — в файле .env рядом (образец: .env.example). Без него compose
+# не стартует: пароли по умолчанию больше не зашиты.
+#
+#   cp .env.example .env   # и заполнить значения
+#   docker compose up -d --build
+#   docker compose exec backend python -m scripts.admin.create_admin --email you@example.com --username you
+
+name: aniflow
+
+x-hardening: &hardening
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "5" }
+
+services:
+  postgres:
+    <<: *hardening
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-aniflow}
+    # Порт БД доступен только с этой машины (для pgAdmin/миграций), не из сети.
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 1g
+
+  redis:
+    <<: *hardening
+    image: redis:7.4-alpine
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    mem_limit: 256m
+
+  backend:
+    <<: *hardening
+    build: ./backend
+    environment:
+      ENV: ${ENV:-production}
+      PROJECT_NAME: ${PROJECT_NAME:-AniFlow API}
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-aniflow}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      RATE_LIMIT_STORAGE_URI: redis://:${REDIS_PASSWORD}@redis:6379/1
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:?set BACKEND_CORS_ORIGINS in .env}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      # Доверяем X-Forwarded-For только от контейнеров этой compose-сети.
+      FORWARDED_ALLOW_IPS: "172.16.0.0/12"
+    volumes:
+      - media:/app/static
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    # Порт API наружу не публикуется: доступ только через frontend-nginx.
+    expose:
+      - "8000"
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp:size=1g   # FFmpeg-студия и сборка ZIP пишут во временные файлы
+    pids_limit: 200
+    mem_limit: 1g
+
+  frontend:
+    <<: *hardening
+    build:
+      context: ./frontend
+      args:
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+    depends_on:
+      - backend
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+    pids_limit: 100
+    mem_limit: 128m
+
+volumes:
+  postgres_data:
+  redis_data:
+  media:

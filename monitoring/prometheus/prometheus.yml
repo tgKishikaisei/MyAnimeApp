@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'fastapi_backend'
+    scrape_interval: 15s
+    # В общей compose-сети backend доступен по имени сервиса.
+    # /metrics защищён токеном (METRICS_TOKEN в .env бэкенда); впишите тот же
+    # токен в monitoring/prometheus/metrics_token (файл не коммитится).
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/metrics_token
+    static_configs:
+      - targets: ['backend:8000']
