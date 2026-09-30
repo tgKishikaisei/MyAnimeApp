@@ -16,6 +16,7 @@ FROM python:3.12-slim
 
 # ffmpeg — для студии клипов, шрифт — для текста мемов, pg_dump — для бэкапа.
 RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core postgresql-client \
  && rm -rf /var/lib/apt/lists/* \
  && useradd --create-home --uid 1000 appuser
