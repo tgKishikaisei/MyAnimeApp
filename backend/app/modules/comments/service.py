@@ -24,7 +24,7 @@ class CommentService:
         avatar_url: str | None,
         reactions: dict,
         my_reaction: str | None,
-        replies: list = [],
+        replies: list | None = None,
     ) -> Dict[str, Any]:
         """
         Собирает все разрозненные данные о комментарии в один красивый JSON-ответ для фронтенда.
@@ -46,7 +46,7 @@ class CommentService:
             "timecode_seconds": comment.timecode_seconds,   # Секунда видео (если комментарий привязан к видео)
             "reactions": reactions,                         # Словарь всех реакций
             "my_reaction": my_reaction,                     # Реакция, которую поставил ТЫ
-            "replies": replies,                             # Вложенные комментарии (ответы)
+            "replies": replies if replies is not None else [],                             # Вложенные комментарии (ответы)
         }
 
     async def get_target_comments(
